@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>drop</title>
+	<style type="text/css">
+body {
+	background: #ccc;
+}
+
+.dropdown {
+	text-align:left;
+  color: #333;
+	user-select: none;
+	border-radius: 5px;
+	background: white;
+	cursor: pointer;
+	width: 200px;
+	height: 30px;
+	line-height: 30px;
+	display: inline-block;
+	position: relative;
+	font-size: 1.2em;
+	font-family: Arial;
+	background: white;
+	box-shadow: 2px 2px 2px #999;
+	border: 1px solid #aaa;
+}
+
+.dropdown_value {
+	display: inline-block;
+	padding-left: 5px;
+}
+
+.dropdown_arrow {
+	transition: all 0.2s ease;
+	position: absolute;
+	right: 5px;
+	top: 0px;
+	color: #ccc;
+	font-size: 25px;
+}
+
+.dropdown_panel {
+	position: absolute;
+	background: transparent;
+	width: calc(100% + 11px);
+	z-index: 9999;
+	height: 203px;
+	left: -1px;
+	top: 26px;
+	overflow: hidden;
+	pointer-events: none;
+}
+
+.dropdown_items {
+	position: absolute;
+	pointer-events: all;
+	z-index: 9999;
+	top: 0px;
+	width: calc(100% - 11px);
+	max-height: 170px;
+	background: white;
+	border-bottom-left-radius: 5px;
+	border-bottom-right-radius: 5px;
+	box-shadow: 2px 2px 2px #999;
+	transform: translate(0px, -200px);
+	transition: 0.3s all ease-out;
+	overflow-y: auto;
+	border: 1px solid #aaa;
+}
+
+.dropdown_item {
+	padding: 5px;
+}
+
+.dropdown_item:hover {
+	background: #eee;
+}
+
+.dropdown ::-webkit-scrollbar {
+	width: 8px;
+}
+
+.dropdown ::-webkit-scrollbar-thumb {
+	background-color: #999;
+}
+	</style>
+</head>
+<body>
+	<div id="dd1"> </div>
+	<script type="text/javascript" >
+		
+function Dropdown(o)
+{
+	this.options = o;
+
+	window.getdd = function(elem)
+	{
+		var id = elem.closest('.dropdown').parentElement.id;
+		return window.dropdowns[id];
+	}
+
+	this.init = function()
+	{
+		this.elem = document.getElementById(this.options.id);
+
+		var html =
+			`<div class='dropdown'>
+    			<div class='dropdown_value'></div>
+		          <div class='dropdown_arrow'>▾</div>
+		          <div class='dropdown_panel'>
+		          	<div class='dropdown_items'></div>
+		          </div>
+		    </div>`;
+    
+	    var self = this;
+	    document.addEventListener("mousedown", function() {
+	    	if (self.isVisible) self.hide();
+	    });
+ 
+		if (!window.dropdowns) window.dropdowns = {};
+		window.dropdowns[this.options.id] = this;
+
+		
+    	this.elem.style.display = 'inline-block';
+
+		this.elem.innerHTML = html;
+		var elem = this.elem;
+		this.items = elem.querySelector(".dropdown_items");
+		this.value = elem.querySelector(".dropdown_value");
+
+		this.panel = elem.querySelector(".dropdown_panel");
+		this.arrow = elem.querySelector(".dropdown_arrow");
+
+		var self = this;
+		this.value.innerHTML = this.options.val;
+
+		var data = this.options.data;
+		var html = "";
+		data.forEach(function(elem)
+		{
+			html += `<div class='dropdown_item' onmousedown='var self=getdd(this);self.clicked(this)'>${elem}</div>`;
+		});
+		this.items.innerHTML = html;
+
+		this.elem.addEventListener('mousedown', function()
+		{
+			event.stopPropagation();
+
+			if (self.isVisible)
+				self.hide();
+			else
+				self.show();
+
+		});
+
+
+	}
+
+	this.clicked = function(elem)
+	{
+	  	event.stopPropagation();
+	    this.hide();
+	    
+		var newval = elem.innerHTML;
+		this.value.innerHTML = newval;
+
+		if (this.options.cb)
+			this.options.cb(newval);
+
+	}
+
+	this.show = function()
+	{
+  	for (var dd in window.dropdowns)
+    	window.dropdowns[dd].hide();
+    
+		this.isVisible = true;
+		this.items.style.transform = 'translate(0px,0px)';
+		this.arrow.style.transform = 'rotate(180deg)';
+	}
+
+	this.hide = function()
+	{
+  	if (!this.items) return;
+    
+		this.isVisible = false;
+		this.items.style.transform = 'translate(0px,-255px)';
+		this.arrow.style.transform = 'rotate(0deg)';
+	}
+
+	this.init();
+	return this;
+}
+
+var dd = new Dropdown(
+{
+	id: 'dd1',
+	val: 'cat',
+	data: ['cat', 'dog', 'mouse', 'horse', 'rabbit','lion','bear','tiger'],
+	
+});
+
+var dd2 = new Dropdown(
+{
+	id: 'dd2',
+	val: 'dog',
+	data: ['cat', 'dog', 'mouse', 'horse', 'rabbit','lion','bear','tiger'],
+	
+});
+	</script>
+</body>
+</html>
